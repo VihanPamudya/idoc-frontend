@@ -8,7 +8,7 @@ const CompanymanagementModal = ({
   formSubmit,
   formState,
   setformState,
-  cancel
+  cancel,
 }: {
   show: boolean;
   onHide: () => void;
@@ -17,8 +17,9 @@ const CompanymanagementModal = ({
   formSubmit: any;
   formState: any;
   setformState: any;
-  cancel:any;
+  cancel: any;
 }) => {
+  //Get form values
   const onChange = (event: any) => {
     var change, value;
     if (event.target) {
@@ -27,26 +28,34 @@ const CompanymanagementModal = ({
     }
     setformState({ ...formState, [change]: value });
   };
+
   return (
     <div>
-      <Modal show={show} onHide={onHide} size="lg">
-        <Modal.Body style={{paddingLeft :"25px", paddingRight:"25px" }}>
+      <Modal show={show} size="lg">
+        <Modal.Body style={{ paddingLeft: "25px", paddingRight: "25px" }}>
           <div>
             <div className="d-flex flex-row">
-              <h2 style={{ color: "#4B4B4B" }}>
-                {editCompany ? "Edit" : "New Company"}
-              </h2>
+              <div>
+                <h2 style={{ color: "#4B4B4B" }}>
+                  {editCompany ? "Edit" : "New Company"}
+                </h2>
+              </div>
               {editCompany ? (
-                <div>
+                <div
+                  style={{
+                    marginTop: "8px",
+                    marginLeft: "5px",
+                  }}
+                >
                   <h5
                     style={{
                       backgroundColor: "#00B0FF",
                       borderRadius: "10px",
                       textAlign: "center",
                       color: "#4B4B4B",
-                      marginTop: "10px",
-                      marginLeft: "5px",
-                      width: "100px",
+                      width: "auto",
+                      paddingLeft: "15px",
+                      paddingRight: "15px",
                     }}
                   >
                     {formState.companyName}
@@ -56,13 +65,27 @@ const CompanymanagementModal = ({
                 ""
               )}
               {editCompany ? (
-              <div style={{marginLeft:"560px", cursor:"pointer"}} onClick={cancel}>
-                <img src="error.png" alt="cancel" style={{width:"25px", height:"25px"}} />
-              </div>
-              ): (
-                <div style={{marginLeft:"504px", cursor:"pointer"}} onClick={cancel}>
-                <img src="error.png" alt="cancel" style={{width:"25px", height:"25px"}} />
-              </div>
+                <div
+                  style={{ marginLeft: "auto", cursor: "pointer" }}
+                  onClick={cancel}
+                >
+                  <img
+                    src="error.png"
+                    alt="cancel"
+                    style={{ width: "25px", height: "25px" }}
+                  />
+                </div>
+              ) : (
+                <div
+                  style={{ marginLeft: "auto", cursor: "pointer" }}
+                  onClick={cancel}
+                >
+                  <img
+                    src="error.png"
+                    alt="cancel"
+                    style={{ width: "25px", height: "25px" }}
+                  />
+                </div>
               )}
             </div>
             <div
@@ -85,6 +108,9 @@ const CompanymanagementModal = ({
                     required
                     onChange={onChange}
                     autoComplete={"off"}
+                    minLength={3}
+                    maxLength={15}
+                    pattern={"[a-zA-Z]+"}
                   />
                 </div>
               </div>
@@ -93,7 +119,7 @@ const CompanymanagementModal = ({
                 <label className="col-sm-2 col-form-label">Email</label>
                 <div className="col-sm-10">
                   <input
-                    type={"text"}
+                    type={"email"}
                     className="form-control"
                     id="companyEmail"
                     placeholder="Company Email"
@@ -117,6 +143,9 @@ const CompanymanagementModal = ({
                     required
                     onChange={onChange}
                     autoComplete={"off"}
+                    minLength={3}
+                    maxLength={100}
+                    pattern={"^([a-zA-z0-9/\\''(),-s])$"}
                   />
                 </div>
               </div>
@@ -135,6 +164,8 @@ const CompanymanagementModal = ({
                       onChange={onChange}
                       autoComplete={"off"}
                       min={0}
+                      max={500}
+                      pattern={"^(500|[1-9][0-9]?)$"}
                     />
                     <div className="input-group-text">GB</div>
                   </div>
@@ -155,6 +186,7 @@ const CompanymanagementModal = ({
                           value={formState.ustorage}
                           onChange={onChange}
                           autoComplete={"off"}
+                          disabled
                         />
                         <div className="input-group-text">GB</div>
                       </div>
@@ -164,27 +196,6 @@ const CompanymanagementModal = ({
                   ""
                 )}
               </div>
-
-              {editCompany ? (
-                <div className="mb-0 row">
-                  <label className="col-sm-2 col-form-label">
-                    No of Active Users
-                  </label>
-                  <div className="col-sm-10">
-                    <input
-                      type={"number"}
-                      className="form-control"
-                      id="users"
-                      placeholder="No of active users"
-                      value={formState.users}
-                      onChange={onChange}
-                      autoComplete={"off"}
-                    />
-                  </div>
-                </div>
-              ) : (
-                ""
-              )}
 
               <div className="mb-0 row">
                 <label className="col-sm-2 col-form-label">
@@ -197,18 +208,17 @@ const CompanymanagementModal = ({
                     id="documentUploadURL"
                     placeholder="URL"
                     value={formState.documentUploadURL}
-                    required
                     onChange={onChange}
                     autoComplete={"off"}
+                    disabled
                   />
                 </div>
               </div>
-              <div className="mt-4">
-           
-          </div>
+              <div className="mt-4"></div>
               <div>
                 <h5>Contact Person Details</h5>
               </div>
+              <div className="mt-3"></div>
               <div className="mb-3 row">
                 <label className="col-sm-2 col-form-label">Name</label>
                 <div className="col-sm-10">
@@ -221,6 +231,9 @@ const CompanymanagementModal = ({
                     required
                     onChange={onChange}
                     autoComplete={"off"}
+                    minLength={3}
+                    maxLength={30}
+                    pattern={"[a-zA-Z/\\'']+"}
                   />
                 </div>
               </div>
@@ -228,7 +241,7 @@ const CompanymanagementModal = ({
                 <label className="col-sm-2 col-form-label">Email</label>
                 <div className="col-sm-4">
                   <input
-                    type={"text"}
+                    type={"email"}
                     className="form-control"
                     id="contactEmail"
                     placeholder="Email"
@@ -238,10 +251,11 @@ const CompanymanagementModal = ({
                     autoComplete={"off"}
                   />
                 </div>
-                <label className="col-sm-2 col-form-label">Phone NO</label>
+                <label className="col-sm-2 col-form-label">Phone No</label>
                 <div className="col-sm-4">
                   <input
-                    type={"text"}
+                    type={"tel"}
+                    pattern="[0-9]{10}"
                     className="form-control"
                     id="contactNumber"
                     placeholder="Phone number"
@@ -323,7 +337,7 @@ const CompanyCreateUpdate = ({
   formSubmit,
   formState,
   setformState,
-  cancel
+  cancel,
 }: {
   show: boolean;
   onHide: () => void;
@@ -332,7 +346,7 @@ const CompanyCreateUpdate = ({
   formSubmit: any;
   formState: any;
   setformState: any;
-  cancel:any;
+  cancel: any;
 }) => {
   return (
     <>

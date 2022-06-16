@@ -55,13 +55,7 @@ const tagData = produce(
         return state;
       }
 
-      case tagActionTypes.TAG_SEARCH_SUCCEED: {
-        state.allTagDetails = payload;
-        return state;
-      }
-
       case tagActionTypes.TAG_INACTIVE_SUCCEED: {
-        console.log(payload);
         for (let i = 0; i < payload.length; i++) {
           const deleted_tag_id = state.allTagDetails.data.findIndex(
             (item: { id: any }) => item.id === payload[i]

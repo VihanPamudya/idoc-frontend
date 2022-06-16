@@ -1,13 +1,17 @@
 import { Modal } from "react-bootstrap";
 import Select from "react-select";
+import { useState, useEffect } from "react";
 
+// Set gender values
 const gender = [
   { value: "Male", label: "Male" },
   { value: "Female", label: "Female" },
 ];
 
-const current = new Date().toISOString().split("T")[0]
+// Future values can't select
+const today = new Date().toISOString().split("T")[0];
 
+// Values comes from UserCreateUpdate
 const UserManagementModal = ({
   show,
   onHide,
@@ -19,7 +23,7 @@ const UserManagementModal = ({
   roleData,
   groupData,
   sendReset,
-  cancel
+  cancel,
 }: {
   show: boolean;
   onHide: () => void;
@@ -31,7 +35,7 @@ const UserManagementModal = ({
   roleData: any;
   groupData: any;
   sendReset: () => void;
-  cancel:any;
+  cancel: any;
 }) => {
   const onChange = (event: any) => {
     var change, value;
@@ -40,6 +44,7 @@ const UserManagementModal = ({
       value = event.target.value;
       setformState({ ...formState, [change]: value });
     } else if (event.id == "groupList") {
+      // if the id==groupList set the groups
       const value = event.value;
       let x = [] as object[];
       for (let i = 0; i < value.length; i++) {
@@ -52,6 +57,7 @@ const UserManagementModal = ({
       }
       setformState({ ...formState, groupList: x });
     } else if (event.id == "roleList") {
+      // if the id==roleList set the roles
       const value = event.value;
       let x = [] as object[];
       for (let i = 0; i < value.length; i++) {
@@ -72,20 +78,23 @@ const UserManagementModal = ({
 
   return (
     <div>
-      <Modal show={show} onHide={onHide} size="lg">
-        <Modal.Body style={{paddingLeft :"25px", paddingRight:"25px" }}>
+      {/* display the modal */}
+      <Modal show={show} size="lg">
+        <Modal.Body style={{ paddingLeft: "25px", paddingRight: "25px" }}>
           <div>
             <div className="d-flex flex-row">
               <div>
                 <h2 style={{ color: "#4B4B4B" }}>
+                  {/* change the modal title according to add or update */}
                   {editUser ? "Edit" : "New User"}
                 </h2>
               </div>
+              {/* set the username of user according to update */}
               {editUser ? (
                 <div
                   style={{
                     marginTop: "8px",
-                    marginLeft: "5px"
+                    marginLeft: "5px",
                   }}
                 >
                   <h5
@@ -94,7 +103,9 @@ const UserManagementModal = ({
                       borderRadius: "10px",
                       textAlign: "center",
                       color: "#4B4B4B",
-                      width:"150px"
+                      width: "auto",
+                      paddingLeft: "15px",
+                      paddingRight: "15px",
                     }}
                   >
                     {formState.userName}
@@ -104,21 +115,36 @@ const UserManagementModal = ({
                 ""
               )}
               {editUser ? (
-              <div style={{marginLeft:"510px", cursor:"pointer"}} onClick={cancel}>
-                <img src="error.png" alt="cancel" style={{width:"25px", height:"25px"}} />
-              </div>
-              ): (
-                <div style={{marginLeft:"575px", cursor:"pointer"}} onClick={cancel}>
-                <img src="error.png" alt="cancel" style={{width:"25px", height:"25px"}} />
-              </div>
+                <div
+                  style={{ marginLeft: "auto", cursor: "pointer" }}
+                  onClick={cancel}
+                >
+                  <img
+                    src="error.png"
+                    alt="cancel"
+                    style={{ width: "25px", height: "25px" }}
+                  />
+                </div>
+              ) : (
+                <div
+                  style={{ marginLeft: "auto", cursor: "pointer" }}
+                  onClick={cancel}
+                >
+                  <img
+                    src="error.png"
+                    alt="cancel"
+                    style={{ width: "25px", height: "25px" }}
+                  />
+                </div>
               )}
             </div>
             <form onSubmit={formSubmit}>
+              {/* Set the employee number */}
               <div className="mb-3 row">
                 <label className="col-sm-2 col-form-label">Emp No</label>
                 <div className="col-sm-10">
                   <input
-                    type={"number"}
+                    type={"text"}
                     className="form-control"
                     id="epfNumber"
                     placeholder="Employee No"
@@ -126,10 +152,13 @@ const UserManagementModal = ({
                     value={formState.epfNumber}
                     required
                     autoComplete={"off"}
+                    minLength={5}
+                    maxLength={5}
                   />
                 </div>
               </div>
 
+              {/* Set the username */}
               <div className="mb-3 row">
                 <label className="col-sm-2 col-form-label">Username</label>
                 <div className="col-sm-10">
@@ -142,10 +171,14 @@ const UserManagementModal = ({
                     value={formState.userName}
                     required
                     autoComplete={"off"}
+                    minLength={3}
+                    maxLength={10}
+                    pattern={"[a-zA-Z0-9]+"}
                   />
                 </div>
               </div>
 
+              {/* Set the first name and last name */}
               <div className="mb-3 row">
                 <label className="col-sm-2 col-form-label">Firstname</label>
                 <div className="col-sm-4">
@@ -159,6 +192,9 @@ const UserManagementModal = ({
                       value={formState.firstName}
                       required
                       autoComplete={"off"}
+                      minLength={3}
+                      maxLength={10}
+                      pattern={"[a-zA-Z]+"}
                     />
                   </div>
                 </div>
@@ -173,10 +209,14 @@ const UserManagementModal = ({
                     value={formState.lastName}
                     required
                     autoComplete={"off"}
+                    minLength={3}
+                    maxLength={10}
+                    pattern={"[a-zA-Z]+"}
                   />
                 </div>
               </div>
 
+              {/* Set the email */}
               <div className="mb-3 row">
                 <label className="col-sm-2 col-form-label">Email</label>
                 <div className="col-sm-10">
@@ -192,10 +232,12 @@ const UserManagementModal = ({
                   />
                 </div>
               </div>
+
+              {/* Set the user groups */}
               <div className="mb-3 row">
                 <label className="col-sm-2 col-form-label">Groups</label>
                 <div className="col-sm-10">
-                <Select
+                  <Select
                     placeholder="Groups"
                     isMulti
                     options={groupData}
@@ -217,12 +259,13 @@ const UserManagementModal = ({
                       for (let i = 0; i < ex.length; i++) {
                         event.value.push(ex[i].value);
                       }
-
                       onChange(event);
                     }}
                   />
                 </div>
               </div>
+
+              {/* Set the Storage and phone number */}
               <div className="mb-3 row">
                 <label className="col-sm-2 col-form-label">Storage</label>
                 <div className="col-sm-4">
@@ -237,6 +280,8 @@ const UserManagementModal = ({
                       required
                       autoComplete={"off"}
                       min={0}
+                      max={100}
+                      pattern={"^(100|[1-9][0-9]?)$"}
                     />
                     <div className="input-group-text">GB</div>
                   </div>
@@ -256,6 +301,8 @@ const UserManagementModal = ({
                   />
                 </div>
               </div>
+
+              {/* Set the gender and date of birth */}
               <div className="mb-3 row">
                 <label className="col-sm-2 col-form-label">Gender</label>
                 <div className="col-sm-4">
@@ -273,16 +320,19 @@ const UserManagementModal = ({
                 <div className="col-sm-4">
                   <input
                     type={"date"}
-                    max={current}
+                    max={today}
                     className="form-control"
                     id="dateOfBirth"
                     placeholder="Date of Birth"
                     onChange={onChange}
                     value={formState.dateOfBirth}
                     autoComplete={"off"}
+                    required
                   />
                 </div>
               </div>
+
+              {/* Set the address */}
               <div className="mb-3 row">
                 <label className="col-sm-2 col-form-label">Address</label>
                 <div className="col-sm-10">
@@ -295,9 +345,14 @@ const UserManagementModal = ({
                     value={formState.address}
                     required
                     autoComplete={"off"}
+                    minLength={3}
+                    maxLength={100}
+                    pattern={"^([a-zA-z0-9/\\''(),-s])$"}
                   />
                 </div>
               </div>
+
+              {/* Set the roles */}
               <div className="mb-3 row">
                 <label className="col-sm-2 col-form-label">Position</label>
                 <div className="col-sm-10">
@@ -332,11 +387,15 @@ const UserManagementModal = ({
               {editUser ? (
                 ""
               ) : (
+                // Set the password
+
                 <div className="mb-3 row">
                   <label className="col-sm-2 col-form-label">Password</label>
                   <div className="col-sm-10">
                     <input
                       type={"password"}
+                      pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                      title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
                       className="form-control"
                       id="password"
                       placeholder="password"
@@ -429,6 +488,7 @@ const UserManagementModal = ({
   );
 };
 
+// Values pass from userList
 const UserCreateUpdate = ({
   show,
   onHide,
@@ -440,7 +500,7 @@ const UserCreateUpdate = ({
   roleData,
   groupData,
   sendReset,
-  cancel
+  cancel,
 }: {
   show: boolean;
   onHide: () => void;
@@ -452,9 +512,10 @@ const UserCreateUpdate = ({
   roleData: any;
   groupData: any;
   sendReset: () => void;
-  cancel:any;
+  cancel: any;
 }) => {
   return (
+    // Values pass to the UserManagementModal
     <>
       <UserManagementModal
         show={show}

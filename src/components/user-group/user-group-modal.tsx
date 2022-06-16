@@ -1,21 +1,19 @@
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import Select from "react-select";
 import SelectTag from "../common/SelectTags";
-import { useDispatch } from "react-redux";
 
 const UserGroupModal = ({
   show,
-  onHide,
   editGroup,
   handleShowDelete,
   form,
   setForm,
   formSubmit,
   groups,
-  cancel
+  cancel,
+  onSearch
 }: {
   show: boolean;
-  onHide: () => void;
   editGroup: boolean;
   formSubmit: any;
   handleShowDelete: () => void;
@@ -23,42 +21,40 @@ const UserGroupModal = ({
   setForm: any;
   groups: any;
   cancel:any;
+  onSearch:any;
 }) => {
-  const dispatch = useDispatch();
-  // const member = members.map(function (mem: any) {
-  //   return { value: mem.userName, label: mem.userName };
-  // });
 
+  //options for form parent groups selection
   const parent = groups.map(function (group: any) {
-    return { value: group.name, label: group.name };
+    return { value: group.id, label: group.name };
   });
 
+  //delete function for selected tags in the form
   const onDelete = (value: any, parent: boolean) => {
     if (parent) {
-      setForm({ ...form, parentGroup_name: "", parentGroup_id: 0 });
+      setForm({ ...form, parent_group_name: "", parentGroup_id: 0 });
     } 
   };
 
+  //function for form input onChange 
   const onChange = (event: any) => {
     if (event.target) {
       const name = event.target.name;
       const value = event.target.value;
       setForm({ ...form, [name]: value });
     } else {
-      const value = event.value;
-      const formparentgroup = groups.find((item: any) => item.name == value);
       setForm({
         ...form,
-        parentGroup_name: value,
-        parentGroup_id: formparentgroup.id,
+        parent_group_name: event.label,
+        parentGroup_id: event.value,
       });
     }
   };
 
+  
   return (
     <Modal
       show={show}
-      onHide={onHide}
       size="lg"
       aria-labelledby="contained-modal-title-vcenter"
       centered
@@ -66,12 +62,12 @@ const UserGroupModal = ({
       <Modal.Body style={{paddingLeft :"25px", paddingRight:"25px" }}>
         <div className="d-flex">
           <h3 style={{ fontWeight: "bold", marginBottom: "30px" }}>
-            {editGroup ? "Edit" : "New Group"}{" "}
+            {editGroup ? "Edit Group" : "New Group"}{" "}
           </h3>
 
           {editGroup ? (
             <div
-              style={{ marginTop: "8px", marginLeft: "5px", width: "250px" }}
+              style={{ marginTop: "8px", marginLeft: "5px" }}
             >
               <h5
                 style={{
@@ -79,7 +75,9 @@ const UserGroupModal = ({
                   borderRadius: "10px",
                   textAlign: "center",
                   color: "#4B4B4B",
-                  width:"230px"
+                  width: "auto",
+                  paddingLeft: "15px",
+                  paddingRight: "15px",
                 }}
               >
                 {form.name}
@@ -89,11 +87,11 @@ const UserGroupModal = ({
             ""
           )}
            {editGroup ? (
-              <div style={{marginLeft:"440px", cursor:"pointer"}} onClick={cancel}>
+              <div style={{marginLeft:"auto", cursor:"pointer"}} onClick={cancel}>
                 <img src="error.png" alt="cancel" style={{width:"25px", height:"25px"}} />
               </div>
               ): (
-                <div style={{marginLeft:"575px", cursor:"pointer"}} onClick={cancel}>
+                <div style={{marginLeft:"auto", cursor:"pointer"}} onClick={cancel}>
                 <img src="error.png" alt="cancel" style={{width:"25px", height:"25px"}} />
               </div>
               )}
@@ -127,10 +125,11 @@ const UserGroupModal = ({
                   options={parent}
                   placeholder="Search a group"
                   onChange={onChange}
+                  onInputChange={onSearch}
                 />
               ) : (
                 <SelectTag
-                  value={form.parentGroup_name}
+                  value={form.parent_group_name}
                   onClick={onDelete}
                   parent={true}
                 />

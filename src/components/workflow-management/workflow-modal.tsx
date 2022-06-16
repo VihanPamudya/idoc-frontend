@@ -1,18 +1,14 @@
 import { Modal } from "react-bootstrap";
 import Select from "react-select";
-import React, { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { setgroups } from "process";
+import { useDispatch, useSelector } from "react-redux";
+import Permission from "../common/Permission";
+import { searchUserUsergroups } from "../../redux/actions/searchAction";
 
+// set the stepType for workflow
 const stepType = [
   { value: "Validate", label: "Validate" },
   { value: "Approve", label: "Approve" },
-];
-
-const workflowStepAction = [
-  { value: "Add", label: "Add a tag" },
-  { value: "Remove", label: "Remove a tag" },
-  { value: "Process", label: "Process files" },
 ];
 
 const WorkflowmanagementModal = ({
@@ -23,10 +19,6 @@ const WorkflowmanagementModal = ({
   formState,
   setformState,
   cancel,
-  setShowTag,
-  setRejectTag,
-  showtag,
-  rejecttag,
   handleShowDelete,
 }: {
   show: boolean;
@@ -36,12 +28,9 @@ const WorkflowmanagementModal = ({
   formState: any;
   setformState: any;
   cancel: any;
-  setShowTag: any;
-  setRejectTag: any;
-  showtag: boolean;
-  rejecttag: boolean;
   handleShowDelete: any;
 }) => {
+  const dispatch = useDispatch();
   const onChange = (event: any) => {
     var change, value;
     if (event.target) {
@@ -51,6 +40,13 @@ const WorkflowmanagementModal = ({
     setformState({ ...formState, [change]: value });
   };
 
+  // users and usergroups data
+  const searchData = useSelector((state: any) =>
+    state.searchData.searchResults.map((item: any) => {
+      return { value: item.id, label: item.name, isUser: item.user };
+    })
+  );
+
   const onChangeHandlerSteps = (e: any, index: number) => {
     let name = "";
     let value = "";
@@ -58,19 +54,17 @@ const WorkflowmanagementModal = ({
     if (e.target) {
       name = e.target.id;
       value = e.target.value;
-    } else if (e.name) {
+    } else {
       name = e.name;
       value = e.value;
-      setShowTag(true);
-    } else {
-      name = "stepType";
-      value = e.value;
-      setShowTag(false);
     }
 
+    // set the user or usergroup and other values in steptype
     let oldSteps = JSON.parse(JSON.stringify(formState.steps));
     if (name == "stepAssigned") {
-      oldSteps[index].stepAssigned.epfNumber = value;
+      oldSteps[index].stepAssigned = value;
+      oldSteps[index].stepAssignedIsUser = e.isUser;
+      oldSteps[index].stepAssignedName = e.label;
     } else {
       oldSteps[index][name] = value;
     }
@@ -81,6 +75,15 @@ const WorkflowmanagementModal = ({
     });
   };
 
+  // permission table
+  const onChangePermission = (permis: any) => {
+    setformState({
+      ...formState,
+      permissionList: permis,
+    });
+  };
+
+  // drag the workflow step
   const onDragEnd = (result: any) => {
     if (!result.destination) {
       return;
@@ -96,6 +99,12 @@ const WorkflowmanagementModal = ({
     });
   };
 
+  // search user or usergroup
+  const onInputChange = (name: string) => {
+    dispatch(searchUserUsergroups(name));
+  };
+
+  // reorder the steps after dragging
   const reorder = (list: any, startIndex: number, endIndex: number) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -103,13 +112,14 @@ const WorkflowmanagementModal = ({
     return result;
   };
 
+  // add another workflow step
   const addclick = () => {
     let stepsArray = JSON.parse(JSON.stringify(formState.steps));
     stepsArray.push({
       stepType: "",
-      stepAssigned: {
-        epfNumber: "",
-      },
+      stepAssigned: "",
+      stepAssignedIsUser: "",
+      stepAssignedName: "",
       description: "",
       stepAction: "",
     });
@@ -119,22 +129,7 @@ const WorkflowmanagementModal = ({
     });
   };
 
-  const handleShowTag = () => {
-    setShowTag(true);
-  };
-
-  const handleCloseTag = () => {
-    setShowTag(false);
-  };
-
-  const rejectShowTag = () => {
-    setRejectTag(true);
-  };
-
-  const rejectCloseTag = () => {
-    setRejectTag(false);
-  };
-
+  // workflow steps delete
   const handleStepDelete = (id: number) => {
     let steps = JSON.parse(JSON.stringify(formState.steps));
 
@@ -147,24 +142,31 @@ const WorkflowmanagementModal = ({
 
   return (
     <div>
-      <Modal show={show} onHide={onHide} size="lg">
+      <Modal show={show} size="lg">
         <Modal.Body style={{ paddingLeft: "25px", paddingRight: "25px" }}>
           <div>
             <div className="d-flex flex-row">
-              <h2 style={{ color: "#4B4B4B" }}>
-                {editWorkflow ? "Edit" : "New Workflow"}
-              </h2>
+              <div>
+                <h2 style={{ color: "#4B4B4B" }}>
+                  {editWorkflow ? "Edit" : "New Workflow"}
+                </h2>
+              </div>
               {editWorkflow ? (
-                <div>
+                <div
+                  style={{
+                    marginTop: "8px",
+                    marginLeft: "5px",
+                  }}
+                >
                   <h5
                     style={{
                       backgroundColor: "#00B0FF",
                       borderRadius: "10px",
                       textAlign: "center",
                       color: "#4B4B4B",
-                      marginTop: "10px",
-                      marginLeft: "5px",
-                      width: "150px",
+                      width: "auto",
+                      paddingLeft: "15px",
+                      paddingRight: "15px",
                     }}
                   >
                     {formState.workflowName}
@@ -175,7 +177,7 @@ const WorkflowmanagementModal = ({
               )}
               {editWorkflow ? (
                 <div
-                  style={{ marginLeft: "510px", cursor: "pointer" }}
+                  style={{ marginLeft: "auto", cursor: "pointer" }}
                   onClick={cancel}
                 >
                   <img
@@ -186,7 +188,7 @@ const WorkflowmanagementModal = ({
                 </div>
               ) : (
                 <div
-                  style={{ marginLeft: "500px", cursor: "pointer" }}
+                  style={{ marginLeft: "auto", cursor: "pointer" }}
                   onClick={cancel}
                 >
                   <img
@@ -198,7 +200,9 @@ const WorkflowmanagementModal = ({
               )}
             </div>
 
+            {/* workflow form */}
             <form onSubmit={formSubmit}>
+              {/* set the workflow name */}
               <div className="form-group mt-2">
                 <label>Workflow Name</label>
                 <div className="mt-2">
@@ -211,6 +215,9 @@ const WorkflowmanagementModal = ({
                     required
                     onChange={onChange}
                     autoComplete={"off"}
+                    minLength={3}
+                    maxLength={15}
+                    pattern={"[a-zA-Z]+"}
                   />
                 </div>
               </div>
@@ -281,6 +288,7 @@ const WorkflowmanagementModal = ({
                                         </div>
                                       </div>
 
+                                      {/* set the step type */}
                                       <div className="mb-3 row">
                                         <label className="col-sm-2 col-form-label">
                                           Step type
@@ -289,34 +297,50 @@ const WorkflowmanagementModal = ({
                                           <Select
                                             options={stepType}
                                             placeholder="Step type"
-                                            onChange={(e) =>
-                                              onChangeHandlerSteps(e, index)
-                                            }
+                                            onChange={(e) => {
+                                              let data = {
+                                                label: e?.label,
+                                                value: e?.value,
+                                                name: "stepType",
+                                              };
+                                              onChangeHandlerSteps(data, index);
+                                            }}
                                             value={{
                                               value: e.stepType,
                                               label: e.stepType,
                                             }}
                                           />
                                         </div>
+
+                                        {/* set the assign user or usergroup */}
                                         <label className="col-sm-2 col-form-label">
                                           Assigned to
                                         </label>
                                         <div className="col-sm-4">
-                                          <input
-                                            type={"text"}
-                                            className="form-control"
+                                          <Select
+                                            placeholder="User or user group"
                                             id="stepAssigned"
-                                            placeholder="Search a user or group"
-                                            onChange={(e) =>
-                                              onChangeHandlerSteps(e, index)
-                                            }
-                                            value={e?.stepAssigned?.epfNumber}
-                                            required
-                                            autoComplete={"off"}
+                                            options={searchData}
+                                            value={{
+                                              value: e?.stepAssigned,
+                                              isUser: e.stepAssignedIsUser,
+                                              label: e.stepAssignedName,
+                                            }}
+                                            onInputChange={onInputChange}
+                                            onChange={(e) => {
+                                              let data = {
+                                                label: e?.label,
+                                                value: e?.value,
+                                                isUser: e?.isUser,
+                                                name: "stepAssigned",
+                                              };
+                                              onChangeHandlerSteps(data, index);
+                                            }}
                                           />
                                         </div>
                                       </div>
 
+                                      {/* set the description */}
                                       <div className="form-group mt-2">
                                         <div className="mt-2">
                                           <textarea
@@ -325,6 +349,8 @@ const WorkflowmanagementModal = ({
                                             id="description"
                                             value={e.description}
                                             required
+                                            minLength={3}
+                                            maxLength={100}
                                             onChange={(e) =>
                                               onChangeHandlerSteps(e, index)
                                             }
@@ -332,247 +358,6 @@ const WorkflowmanagementModal = ({
                                           ></textarea>
                                         </div>
                                       </div>
-                                      <div className="mt-3"></div>
-                                      <div className="d-flex justify-content-center">
-                                        <h5>What happens after?</h5>
-                                      </div>
-                                      <div className="mt-2"></div>
-                                      {e.stepType == "Approve" ? (
-                                        <div className="mb-3 row">
-                                          <div className="mb-3 row">
-                                            <label className="col-sm-2 col-form-label">
-                                              Approved
-                                            </label>
-                                            <div className="col-sm-4">
-                                              <div className="input-group">
-                                                <div className="col-sm-10">
-                                                  <Select
-                                                    defaultValue={{
-                                                      label: "Add a tag",
-                                                      value: "Add",
-                                                    }}
-                                                    options={workflowStepAction}
-                                                    onChange={(e) => {
-                                                      let data = {
-                                                        value: e?.value,
-                                                        name: "stepAction",
-                                                      };
-                                                      onChangeHandlerSteps(
-                                                        data,
-                                                        index
-                                                      );
-                                                    }}
-                                                    value={{
-                                                      value: e.stepAction,
-                                                      label: e.stepAction,
-                                                    }}
-                                                  />
-                                                </div>
-                                                <div
-                                                  className="input-group-text"
-                                                  style={{ cursor: "pointer" }}
-                                                >
-                                                  +
-                                                </div>
-                                              </div>
-                                              <div className="mt-3"></div>
-                                              {showtag ? (
-                                                <div
-                                                  style={{
-                                                    border: "2px dashed #ccc",
-                                                    padding: "6px",
-                                                  }}
-                                                >
-                                                  <div
-                                                    style={{ fontSize: "14px" }}
-                                                  >
-                                                    Add a tag
-                                                  </div>
-                                                  <div className="mt-2"></div>
-                                                  <div>
-                                                    <Select
-                                                      options={
-                                                        workflowStepAction
-                                                      }
-                                                    />
-                                                  </div>
-                                                  <div className="mt-2"></div>
-                                                  <div
-                                                    style={{
-                                                      fontSize: "14px",
-                                                      color: "#337ab7",
-                                                      textAlign: "center",
-                                                      cursor: "pointer",
-                                                    }}
-                                                    onClick={handleCloseTag}
-                                                  >
-                                                    Remove action
-                                                  </div>
-                                                </div>
-                                              ) : (
-                                                ""
-                                              )}
-                                            </div>
-
-                                            <label className="col-sm-2 col-form-label">
-                                              Rejected
-                                            </label>
-                                            <div className="col-sm-4">
-                                              <div className="input-group">
-                                                <div className="col-sm-10">
-                                                  <Select
-                                                    defaultValue={{
-                                                      label: "Add a tag",
-                                                      value: "Add",
-                                                    }}
-                                                    options={workflowStepAction}
-                                                    onChange={(e) => {
-                                                      let data = {
-                                                        value: e?.value,
-                                                        name: "stepAction2",
-                                                      };
-                                                      onChangeHandlerSteps(
-                                                        data,
-                                                        index
-                                                      );
-                                                    }}
-                                                    value={{
-                                                      value: e.stepAction2,
-                                                      label: e.stepAction2,
-                                                    }}
-                                                  />
-                                                </div>
-                                                <div
-                                                  className="input-group-text"
-                                                  style={{ cursor: "pointer" }}
-                                                  onClick={rejectShowTag}
-                                                >
-                                                  +
-                                                </div>
-                                              </div>
-                                              <div className="mt-3"></div>
-                                              {rejecttag ? (
-                                                <div
-                                                  style={{
-                                                    border: "2px dashed #ccc",
-                                                    padding: "6px",
-                                                  }}
-                                                >
-                                                  <div
-                                                    style={{ fontSize: "14px" }}
-                                                  >
-                                                    Add a tag
-                                                  </div>
-                                                  <div className="mt-2"></div>
-                                                  <div>
-                                                    <Select
-                                                      options={
-                                                        workflowStepAction
-                                                      }
-                                                    />
-                                                  </div>
-                                                  <div className="mt-2"></div>
-                                                  <div
-                                                    style={{
-                                                      fontSize: "14px",
-                                                      color: "#337ab7",
-                                                      textAlign: "center",
-                                                      cursor: "pointer",
-                                                    }}
-                                                    onClick={rejectCloseTag}
-                                                  >
-                                                    Remove action
-                                                  </div>
-                                                </div>
-                                              ) : (
-                                                ""
-                                              )}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      ) : (
-                                        <div className="mb-3 row">
-                                          <label className="col-sm-2 col-form-label">
-                                            Validated
-                                          </label>
-                                          <div className="col-sm-4">
-                                            <Select
-                                              defaultValue={{
-                                                label: "Add a tag",
-                                                value: "Add",
-                                              }}
-                                              options={workflowStepAction}
-                                              onChange={(e) => {
-                                                let data = {
-                                                  value: e?.value,
-                                                  name: "stepAction",
-                                                };
-                                                onChangeHandlerSteps(
-                                                  data,
-                                                  index
-                                                );
-                                              }}
-                                              value={{
-                                                value: e.stepAction,
-                                                label: e.stepAction,
-                                              }}
-                                            />
-
-                                            {showtag ? (
-                                              <div
-                                                style={{
-                                                  border: "2px dashed #ccc",
-                                                  padding: "6px",
-                                                }}
-                                              >
-                                                <div
-                                                  style={{ fontSize: "14px" }}
-                                                >
-                                                  Add a tag
-                                                </div>
-                                                <div className="mt-2"></div>
-                                                <div>
-                                                  <Select
-                                                    options={workflowStepAction}
-                                                  />
-                                                </div>
-                                                <div className="mt-2"></div>
-                                                <div
-                                                  style={{
-                                                    fontSize: "14px",
-                                                    color: "#337ab7",
-                                                    textAlign: "center",
-                                                    cursor: "pointer",
-                                                  }}
-                                                  onClick={handleCloseTag}
-                                                >
-                                                  <button><svg
-                                                    width="15"
-                                                    height="15"
-                                                    viewBox="0 0 18 18"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    style={{
-                                                      marginRight: "5px",
-                                                      color:"black"
-                                                    }}
-                                                  >
-                                                    <path
-                                                      d="M16.7143 7.23995H10.9286V1.90302C10.9286 1.24814 10.3528 0.717041 9.64286 0.717041H8.35714C7.64719 0.717041 7.07143 1.24814 7.07143 1.90302V7.23995H1.28571C0.575759 7.23995 0 7.77105 0 8.42594V9.61192C0 10.2668 0.575759 10.7979 1.28571 10.7979H7.07143V16.1348C7.07143 16.7897 7.64719 17.3208 8.35714 17.3208H9.64286C10.3528 17.3208 10.9286 16.7897 10.9286 16.1348V10.7979H16.7143C17.4242 10.7979 18 10.2668 18 9.61192V8.42594C18 7.77105 17.4242 7.23995 16.7143 7.23995Z"
-                                                      fill="white"
-                                                    />
-                                                  </svg></button>
-                                                  
-                                                  
-                                                  
-                                                </div>
-                                              </div>
-                                            ) : (
-                                              ""
-                                            )}
-                                          </div>
-                                        </div>
-                                      )}
                                     </div>
                                   </div>
                                 </div>
@@ -586,6 +371,15 @@ const WorkflowmanagementModal = ({
                   </Droppable>
                 </div>
               </DragDropContext>
+
+              <div className="mt-4"></div>
+              {editWorkflow && (
+                <Permission
+                  onChangePermission={onChangePermission}
+                  permissionList={formState.permissionList}
+                />
+              )}
+              <div className="mt-4"></div>
 
               <div className="d-flex flex-row" style={{ marginTop: "15px" }}>
                 <div className="col-md-8">
@@ -611,12 +405,17 @@ const WorkflowmanagementModal = ({
                     Add a workflow step
                   </button>
                 </div>
+
                 <div className="d-flex flex-row-reverse col-md-4">
                   <div style={{ marginLeft: "10px" }}>
                     <button
                       type="submit"
                       className="btn btn-primary"
                       style={{ backgroundColor: "#00E676", border: "#00E676" }}
+                      disabled={
+                        !formState.steps.stepType ||
+                        !formState.steps.stepAssigned.length
+                      }
                     >
                       <img
                         src="edit.png"
@@ -666,6 +465,7 @@ const WorkflowmanagementModal = ({
   );
 };
 
+// values comes from workflow list
 const WorkflowCreateUpdate = ({
   show,
   onHide,
@@ -674,10 +474,6 @@ const WorkflowCreateUpdate = ({
   formState,
   setformState,
   cancel,
-  setRejectTag,
-  setShowTag,
-  showtag,
-  rejecttag,
   handleShowDelete,
 }: {
   show: boolean;
@@ -687,13 +483,10 @@ const WorkflowCreateUpdate = ({
   formState: any;
   setformState: any;
   cancel: any;
-  setRejectTag: any;
-  setShowTag: any;
-  showtag: boolean;
-  rejecttag: boolean;
   handleShowDelete: any;
 }) => {
   return (
+    // set values to the workflow management modal
     <>
       <WorkflowmanagementModal
         show={show}
@@ -704,10 +497,6 @@ const WorkflowCreateUpdate = ({
         formState={formState}
         setformState={setformState}
         cancel={cancel}
-        setRejectTag={setRejectTag}
-        setShowTag={setShowTag}
-        showtag={showtag}
-        rejecttag={rejecttag}
       />
     </>
   );

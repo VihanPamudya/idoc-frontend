@@ -8,3 +8,7 @@ export * as userRoleActionTypes from './userRoleActionTypes';
 export * as workflowActionTypes from './workflowActionTypes';
 export * as packageActionTypes from './packageActionTypes';
 export * as tagActionTypes from './tagActionTypes';
+export * as searchActionTypes from './searchActionTypes';
+export * as documentActionTypes from './DocumentActionTypes';
+export * as documentHistoryActionTypes from './documentHistoryActionTypes'
+export * as fileActionTypes from './fileActionTypes';

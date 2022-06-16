@@ -11,7 +11,10 @@ import CompanyList from "./pages/companyList";
 import UserRoleList from "./pages/userRoleList";
 import WorkflowList from "./pages/workflowList";
 import TagList from "./pages/TagList";
+import DocumentList from "./pages/Document/documentList";
 import OverlaySpinner from "./components/common/OverlaySpinner";
+import DocumentContent from "./pages/Document/documentContent";
+import DocumentHistory from "./components/document-management/documentHistory";
 
 
 function App() {
@@ -36,7 +39,7 @@ function App() {
     return (
         <div className="App">
 
-            {alert && <Alert style={{position:'fixed', width:'100%', top:0, left:0, zIndex:1000, textAlign:'right'}} variant='danger'>{alert}</Alert> }
+            {alert && <Alert style={{position:'fixed', width:'100%', top:0, left:0, zIndex:1000, textAlign:'center'}} variant='danger'>{alert}</Alert> }
             <OverlaySpinner isLoading={loadingUtils.loading}/>
 
 
@@ -50,6 +53,9 @@ function App() {
                         <Route path="/userrole" element={<UserRoleList/>}/>
                         <Route path="/workflow" element={<WorkflowList/>}/>
                         <Route path="/tags" element={<TagList/>}/>
+                        <Route path="/document" element={<DocumentList/>}/>
+                        <Route path="/content" element={<DocumentContent/>}/>
+                        <Route path="/dh" element={<DocumentHistory/>}/>
                     </Routes>
                     :
                     <Routes>

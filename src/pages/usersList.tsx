@@ -6,7 +6,7 @@ import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import "react-pro-sidebar/dist/css/styles.css";
 
-import { getUsersList, userInactive } from "../redux/actions/userActions";
+import { userInactive, userSearch } from "../redux/actions/userActions";
 import { getRolesList } from "../redux/actions/roleActions";
 import { getGroupList } from "../redux/actions/groupActions";
 import UserCreateUpdate from "../components/user-management/userCreateUpdate";
@@ -18,80 +18,22 @@ import {
 import DeleteModal from "../components/common/DeleteModal";
 import {
   sendForgotPasswordLink,
-  userLogout,
 } from "../redux/actions/authActions";
 import Layout from "../Layout";
+import { Button } from "react-bootstrap";
 
-const columns = [
-  {
-    formatter: (rowContent: any, row: any) => {
-      return (
-        <div>
-          <img src="User.png" style={{ marginRight: "10px" }} />
-          {row.firstName} {row.lastName}
-        </div>
-      );
-    },
-    dataField: "firstName",
-    text: "USERNAME",
-  },
-  {
-    dataField: "",
-    text: "ROLE",
-    formatter: (rowContent: any, row: any) => {
-      return row.roleList.map((item: any) => {
-        return (
-          <div style={{ marginRight: "10px" }} key={item.id}>
-            {item.role.name}
-          </div>
-        );
-      });
-    },
-  },
-  {
-    dataField: "createdDateTime",
-    text: "CREATED DATE",
-    formatter: (rowContent: any, row: any) => {
-      var d = new Date(0);
-      d.setUTCSeconds(rowContent);
-      return moment.utc(d).format("YYYY-MM-DD");
-    },
-  },
-];
-
-const options = {
-  paginationSize: 1,
-  pageStartIndex: 1,
-  firstPageText: "First",
-  prePageText: "Previous",
-  nextPageText: "Next",
-  lastPageText: "Last",
-  nextPageTitle: "First page",
-  prePageTitle: "Pre page",
-  firstPageTitle: "Next page",
-  lastPageTitle: "Last page",
-  showTotal: true,
-  totalSize: 10,
-  disablePageTitle: true,
-  sizePerPageList: [
-    {
-      text: "9",
-      value: 2,
-    },
-  ],
-};
 
 const UsersList = () => {
-  const dispatch = useDispatch();
-  const [showDelete, setShowDelete] = useState(false);
-  const handleCloseDelete = () => setShowDelete(false);
-  const [pageNo, setPageNo] = useState(1);
-  const [showSearch, setShowSearch] = useState("");
-  const state = useSelector((state: any) => state);
-  const [selectid, setSelectId] = useState("");
-  const [selected, setSelected] = useState([]);
-  const [modalShow, setModalShow] = React.useState(false);
-  const [editUser, setEditUser] = React.useState(false);
+  const dispatch = useDispatch(); //Dispatch data
+  const [showDelete, setShowDelete] = useState(false); //Show delete modal
+  const handleCloseDelete = () => setShowDelete(false); //Close delete modal when click 'no'
+  const [pageNo, setPageNo] = useState(1); //Set paginated list page number
+  const [showSearch, setShowSearch] = useState(""); //Set search
+  const state = useSelector((state: any) => state); //Global access
+  const [selectid, setSelectId] = useState(""); //Get selected id when click a row
+  const [selected, setSelected] = useState([]); //Get selected id to a array
+  const [modalShow, setModalShow] = React.useState(false); //Show user create/update modal
+  const [editUser, setEditUser] = React.useState(false); //Check whether editing user details or adding a new user
   const [formState, setformState] = useState({
     username: "",
     email: "",
@@ -105,22 +47,104 @@ const UsersList = () => {
     epfNumber: "",
     firstName: "",
     lastName: "",
+    status:"",
     roleList: [],
     groupList: [],
-  });
+  }); //Set form state
 
+  //Bootstrap tabel details
+  const columns = [
+    {
+      //Column details
+      formatter: (rowContent: any, row: any) => {
+        return (
+          <div>
+            <img src="User.png" style={{ marginRight: "10px", width:"18px" }} />
+            {row.firstName} {row.lastName}
+          </div>
+        );
+      },
+      dataField: "firstName",
+      text: "USERNAME", //Column name
+    },
+    {
+      dataField: "",
+      text: "ROLE", //Column name
+      formatter: (rowContent: any, row: any) => {
+        //Column details
+        return row.roleList.map((item: any) => {
+          return (
+            <div style={{ marginRight: "10px" }} key={item.id}>
+              {item.role.name}
+            </div>
+          );
+        });
+      },
+    },
+    {
+      dataField: "createdDateTime",
+      text: "CREATED DATE", //Column name
+      formatter: (rowContent: any, row: any) => {
+        //Column details
+        var d = new Date(0);
+        d.setUTCSeconds(rowContent);
+        return moment.utc(d).format("YYYY-MM-DD");
+      },
+    },
+    {
+      formatter: (rowContent: any, row: any) => {
+        //Column details
+        return (
+          <div className="text-center actions" style={{ marginRight: "10px" }}>
+            <Button
+              type="submit"
+              className="actions"
+              style={{
+                marginLeft: "10px",
+                backgroundColor: "#00E676",
+                border: "#00E676",
+                padding: "9px 13px",
+                lineHeight: "10px",
+                fontSize: "13px",
+                cursor:"pointer"
+              }}
+              onClick={()=>onClickButton(row.epfNumber)}
+            >
+              <img
+                src="edit.png"
+                alt="edit"
+                className="actions"
+                style={{
+                  width: "12px",
+                  height: "12px",
+                  marginRight: "7px",
+                }}
+              />
+              Edit
+            </Button>
+          </div>
+        );
+      },
+      dataField: "",
+      text: "",
+    },
+  ];
+
+  //Get user role details 
   const roleData = useSelector((state: any) =>
     state.roleData.allRoleDetails.map((item: any) => {
       return { value: item.id, label: item.name };
     })
   );
 
+  //Get user group details
   const groupData = useSelector((state: any) =>
     state.groupData.allGroupDetails.map((item: any) => {
       return { value: item.id, label: item.name };
     })
   );
 
+  //Get paginated list
   useEffect(() => {
     dispatch(
       getPaginatedList({
@@ -134,38 +158,10 @@ const UsersList = () => {
     dispatch(getGroupList());
   }, []);
 
-  // const selectRow: SelectRowProps<any> = {
-  //   mode: "checkbox",
-  //   onSelect: (row, isSelect, rowIndex, e) => {
-  //     let rows = JSON.parse(JSON.stringify(selectedRows));
 
-  //     if (isSelect) {
-  //       rows.push(row.epfNumber);
-  //     } else {
-  //       const unSelectedRow = rows.findIndex((item: any) => {
-  //         item === row.epfNumber;
-  //       });
-  //       rows.splice(unSelectedRow, 1);
-  //     }
-  //     setSelectRows(rows);
-  //   },
-  //   onSelectAll: (isSelect, rows, e) => {
-  //     let array = JSON.parse(JSON.stringify(selectedRows));
-
-  //     if (isSelect) {
-  //       for (let i = 0; i < rows.length; i++) {
-  //         array.push(rows[i].epfNumber);
-  //       }
-  //     } else {
-  //       array.splice(0, rows.length);
-  //     }
-  //     setSelectRows(array);
-  //   },
-  // };
-
+  //Bootstrap tabel on click row events
   const rowEvents = {
     onClick: (e: any, row: any, rowIndex: number) => {
-      console.log(row);
       setformState(row);
       setModalShow(true);
       setEditUser(true);
@@ -173,6 +169,15 @@ const UsersList = () => {
     },
   };
 
+
+  const onClickButton=(e:any)=>{
+    setformState(e);
+    setModalShow(true);
+    setEditUser(true);
+    setSelectId(e.epfNumber);
+  }
+
+  //User inactive
   const handleSelectDelete = () => {
     if (selectid) {
       dispatch(userInactive(selectid, pageNo, showSearch));
@@ -183,28 +188,30 @@ const UsersList = () => {
     setShowDelete(false);
   };
 
+  //Show delete modal
   const handleShowDelete = () => {
     setModalShow(false);
     setShowDelete(true);
   };
 
+  //Cancel modals
   const cancel = () => {
     setModalShow(false);
   };
 
+  //Hide modals
   const onHide = () => {
     setModalShow(false);
   };
 
+  //Submit form
   const formSubmit = (e: any) => {
     e.preventDefault();
     if (editUser) {
-      console.log(formState);
       dispatch(updateUser(formState));
     } else {
       dispatch(addUser(formState));
     }
-
     setModalShow(false);
     setEditUser(false);
     setformState({
@@ -220,10 +227,13 @@ const UsersList = () => {
       epfNumber: "",
       firstName: "",
       lastName: "",
+      status:"",
       roleList: [],
       groupList: [],
     });
   };
+  
+  //Adding a new user
   const editsave = () => {
     setModalShow(true);
     setEditUser(false);
@@ -240,15 +250,18 @@ const UsersList = () => {
       epfNumber: "",
       firstName: "",
       lastName: "",
+      status:"",
       roleList: [],
       groupList: [],
     });
   };
 
+  //Call reset password api
   const sendPWResetLink = () => {
     dispatch(sendForgotPasswordLink(formState.epfNumber));
   };
 
+  //Pagination list properties
   const pagination = paginationFactory({
     sizePerPage: 5,
     page: pageNo ? pageNo : 1,
@@ -258,11 +271,12 @@ const UsersList = () => {
     totalSize: state.userData.allUserDetails.totalSize,
   });
 
+  //Load details when change pages
   const onTableChange = (name: any, e: any) => {
     setPageNo(e.page);
     dispatch(
       getPaginatedList({
-        descending: false,
+        descending: true,
         limit: 5,
         orderFields: ["epf_number"],
         page: e.page,
@@ -270,17 +284,19 @@ const UsersList = () => {
     );
   };
 
+  //function for search bar when the enter key pressed.
   const onKeyHandler = (e: any) => {
     if (e.key === "Enter") {
       var searchValue = {
         filterData: [
           {
-            property: "user_name",
+            property: "first_name",
+            groupingOperator: "OR",
             operator: "LIKE",
             value: `${showSearch}`,
-          },
+          }
         ],
-        descending: false,
+        descending: true,
         limit: 5,
         orderFields: ["epf_number"],
         page: 1,
@@ -291,17 +307,7 @@ const UsersList = () => {
 
   return (
     <Layout>
-      <div className="container">
-        <div className="d-flex flex-row justify-content-between mt-2">
-          <div className="Home" style={{ padding: "10px" }}>
-            <img
-              src="/Home_Button.png"
-              alt="img"
-              style={{ width: "45px", height: "25px" }}
-            />
-          </div>
-        </div>
-        <hr style={{ color: "#636363" }} />
+      <div className="container" style={{ paddingTop: "20px" }}>
         <div className="d-flex flex-column flex-md-row justify-content-between">
           <div>
             <h2 style={{ color: "#4B4B4B", fontWeight: "bold" }}>
@@ -400,10 +406,10 @@ const UsersList = () => {
             data={state.userData.allUserDetails.data}
             columns={columns}
             pagination={pagination}
-            rowStyle={{ color: "#636363", cursor: "pointer" }}
-            classes="table table-hover"
+            rowStyle={{ color: "#636363" }}
+            classes="table"
             bordered={false}
-            rowEvents={rowEvents}
+           rowEvents={rowEvents}
             onTableChange={onTableChange}
             noDataIndication={<></>}
             remote

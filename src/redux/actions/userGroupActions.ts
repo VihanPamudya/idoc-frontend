@@ -42,7 +42,6 @@ export const updateUserGroup = (group: any) => async (dispatch: any) => {
             method: 'PUT',
             data: group,
         });
-
         dispatch({
             type: userGroupActionTypes.UPDATE_USER_GROUP_SUCCEED,
             payload: res.data
@@ -112,15 +111,25 @@ export const userGroupDelete=(selected: String, pageNo: number, searchVal: Strin
     }
 };
 
-export const userGroupSearch = () => async (dispatch: any) => {
+export const userGroupSearch = (details: any) => async (dispatch: any) => {
   dispatch({ type: userGroupActionTypes.USER_GROUP_SEARCH_REQUEST });
-  setTimeout(() => {
-    dispatch({
-      type: userGroupActionTypes.USER_GROUP_SEARCH_SUCCEED,
-      payload: [
-        { id: "1", name: "Group 1" },
-        { id: "2", name: "Group 2" },
-      ],
+  
+  try {
+    const res: any = await APIService({
+        url: `/group-management/group/list`,
+        auth: true,
+        method: 'POST',
+        data: details,
     });
-  }, 2000);
+
+    dispatch({
+        type: userGroupActionTypes.USER_GROUP_SEARCH_SUCCEED,
+        payload: res.data
+    });
+} catch (err: any) {
+    dispatch({
+        type: userGroupActionTypes.USER_GROUP_SEARCH_FAILED,
+        payload: err ? err.data : null
+    });
+}
 };

@@ -19,10 +19,12 @@ const SelectTag = ({
         width: "max-content",
         border: "1px solid rgba(99,99,99,0.5)",
         borderRadius: "9px",
+        marginRight: "10px",
+        cursor: "default"
       }}
     >
       {value}
-      <div className="ms-2 me-2" onClick={() => onClick(value, parent)}>
+      <div className="ms-2 me-2" onClick={() => onClick(value, parent)} style={{ cursor: "pointer" }}>
         x
       </div>
     </div>

@@ -148,3 +148,26 @@ export const workflowSearch = () => async (dispatch: any) => {
     });
   }, 2000);
 };
+
+
+export const getWorkflowListByUserId = () => async (dispatch: any) => {
+    dispatch({ type: workflowActionTypes.WORKFLOW_DETAILS_GETTING_BY_USERID_REQUEST });
+  
+      try {
+          const res: any = await APIService({
+              url: `/workflow-management/workflow/listbyuser`,
+              auth: true,
+              method: 'POST',
+          });
+  
+          dispatch({
+              type: workflowActionTypes.WORKFLOW_DETAILS_GETTING_BY_USERID_SUCCEED,
+              payload: res.data
+          });
+      } catch (err: any) {
+          dispatch({
+              type: workflowActionTypes.WORKFLOW_DETAILS_GETTING_BY_USERID_FAILED,
+              payload: err ? err.data : null
+          });
+      }
+  };

@@ -5,10 +5,12 @@ const Checkbox = (
         onChange,
         name,
         label,
+        checked
     } : {
         onChange: any,
         name: string,
         label?: string,
+        checked?: boolean
     }) => {
 
     return (
@@ -20,6 +22,7 @@ const Checkbox = (
                 id={ name }
                 onChange={ onChange }
                 className= 'form-check-input checkbox-1'
+                checked = {checked}
             />
         </div>
     );

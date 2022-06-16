@@ -2,6 +2,8 @@ import axios from "axios";
 
 const baseURL = "http://localhost:8080";
 
+const ERROR_MSG = "You don't have permission to execute current action"
+
 const APIService = async (config:any) => {
     let defaultHeaders: any = {
         "Access-Control-Allow-Origin": "*",
@@ -33,7 +35,7 @@ const APIService = async (config:any) => {
                 resolve(data);
             })
             .catch((error) => {
-                if (error.response && error.response.status === 401 && !url.includes('login')) {
+                if (error.response && error.response.status === 401 && !error.response.data.includes(ERROR_MSG) && !url.includes('login')) {
                     localStorage.removeItem('token');
                 }
                 reject(error.response)

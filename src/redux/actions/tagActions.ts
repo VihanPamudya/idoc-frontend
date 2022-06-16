@@ -94,31 +94,8 @@ export const getChildrenTagDetails=(tag:any)=>async(dispatch: any)=>{
 
 }
 
-// export const getPaginatedList=(details: any)=>async(dispatch: any)=>{
-//   dispatch({type:tagActionTypes.TAG_DETAILS_GETTING_REQUEST});
-
-//   axios({
-//       method: 'post',
-//       url: `http://localhost:8080/tag-management/tag/list`,
-//       data: details,
-//       headers: {
-//           "Authorization": `Bearer ${localStorage.getItem('token')}`
-//       }
-//   })
-//       .then((res: any)=>{
-//           dispatch({
-//               type: tagActionTypes.TAG_DETAILS_GETTING_SUCCEED,
-//               payload: res.data,
-//           });
-//       }).catch((e)=>{
-//       console.log(e)
-//   })
-// }
-
 export const tagDelete=(selected: String)=>async(dispatch: any)=>{
     dispatch({type:tagActionTypes.TAG_INACTIVE_REQUEST});
-
-
     try {
         const res: any = await APIService({
             url: `/tag-management/tag/delete/${selected}`,
@@ -126,10 +103,7 @@ export const tagDelete=(selected: String)=>async(dispatch: any)=>{
             method: 'DELETE',
         });
 
-        dispatch({
-            type: tagActionTypes.TAG_INACTIVE_SUCCEED,
-            payload: res.data
-        });
+        dispatch(getTagDetails());
     } catch (err: any) {
         dispatch({
             type: tagActionTypes.TAG_INACTIVE_FAILED,
@@ -138,17 +112,5 @@ export const tagDelete=(selected: String)=>async(dispatch: any)=>{
     }
 }
 
-export const tagSearch=()=>async(dispatch: any)=>{
-    dispatch({type:tagActionTypes.TAG_SEARCH_REQUEST});
-    setTimeout(()=>{
-        dispatch({
-            type:tagActionTypes.TAG_SEARCH_SUCCEED,
-            payload:[
-                {id:"1",name:"Group 1"},
-                {id:"2", name:"Group 2"}
-            ]
-        });
-    },2000)
-}
 
 

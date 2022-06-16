@@ -1,9 +1,6 @@
-import { useEffect, useState } from "react";
-import { Modal, ModalBody, Form, Col, Row, Button } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { Modal, Form, Col, Row, Button } from "react-bootstrap";
 import Select from "react-select";
 import SelectTag from "../common/SelectTags";
-
 
 const TagCreateModal = ({
   show,
@@ -14,7 +11,7 @@ const TagCreateModal = ({
   formState,
   setformState,
   tags,
-  cancel
+  cancel,
 }: {
   show: boolean;
   onHide: () => void;
@@ -26,14 +23,19 @@ const TagCreateModal = ({
   tags: any;
   cancel: any;
 }) => {
+  //Get parent tag details for tag create/update modal
   const parent = tags.map(function (tag: any) {
     return { value: tag.id, label: tag.name };
   });
-  const onDelete = (value: any, parent: boolean) => {
+
+  //Delete selected parent tag from tag create/update modal
+  const onDelete = (parent: boolean) => {
     if (parent) {
       setformState({ ...formState, parentTag_id: 0 });
     }
   };
+
+  //Get form data
   const onChange = (event: any) => {
     if (event.target) {
       const name = event.target.name;
@@ -47,12 +49,11 @@ const TagCreateModal = ({
       });
     }
   };
-  console.log(formState, parent);
+
   return (
     <div>
       <Modal
         show={show}
-        onHide={onHide}
         size="lg"
         aria-labelledby="contained-modal-title-vcenter"
         centered
@@ -83,13 +84,27 @@ const TagCreateModal = ({
                 ""
               )}
               {editTag ? (
-              <div style={{marginLeft:"560px", cursor:"pointer"}} onClick={cancel}>
-                <img src="error.png" alt="cancel" style={{width:"25px", height:"25px"}} />
-              </div>
-              ): (
-                <div style={{marginLeft:"79%", cursor:"pointer"}} onClick={cancel}>
-                <img src="error.png" alt="cancel" style={{width:"25px", height:"25px"}} />
-              </div>
+                <div
+                  style={{ marginLeft: "560px", cursor: "pointer" }}
+                  onClick={cancel}
+                >
+                  <img
+                    src="error.png"
+                    alt="cancel"
+                    style={{ width: "25px", height: "25px" }}
+                  />
+                </div>
+              ) : (
+                <div
+                  style={{ marginLeft: "79%", cursor: "pointer" }}
+                  onClick={cancel}
+                >
+                  <img
+                    src="error.png"
+                    alt="cancel"
+                    style={{ width: "25px", height: "25px" }}
+                  />
+                </div>
               )}
             </div>
             <div

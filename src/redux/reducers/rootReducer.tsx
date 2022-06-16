@@ -11,6 +11,10 @@ import workflowData from './workflowReducer';
 import packageData from "./packageReducer";
 import tagData from './tagReducer';
 import loadingData from "./loadingReducer";
+import searchData from "./searchReducer";
+import documentData from './documentReducer';
+import documentHistoryData from './documentHistoryReducer';
+
 
 const rootReducer = combineReducers({
     authData,
@@ -23,7 +27,10 @@ const rootReducer = combineReducers({
     workflowData,
     packageData,
     tagData,
-    loadingData
+    loadingData,
+    searchData,
+    documentData,
+    documentHistoryData
 });
 
 export default rootReducer;

@@ -17,7 +17,7 @@ const userData = produce(
       }
 
       case userActionTypes.USER_SEARCH_SUCCEED: {
-        state.allUserDetails = payload;
+        state.searchGroupDetails = payload.data;
         return state;
       }
 

@@ -3,23 +3,30 @@ import moment from "moment";
 import WorkflowCreateUpdate from "../components/workflow-management/workflow-modal";
 import DeleteModal from "../components/common/DeleteModal";
 import paginationFactory from "react-bootstrap-table2-paginator";
-import BootstrapTable, { SelectRowProps } from "react-bootstrap-table-next";
+import BootstrapTable from "react-bootstrap-table-next";
 import {
   addWorkflow,
   workflowDelete,
-  getWorkflowList,
   updateWorkflow,
   getPaginatedList,
 } from "../redux/actions/workflowActions";
 import { useDispatch, useSelector } from "react-redux";
 import Layout from "../Layout";
+import { Button } from "react-bootstrap";
+import { faShuffle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+//Bootstrap column details
 const columns = [
   {
+    //Column data
     formatter: (rowContent: any, row: any) => {
       return (
         <div>
-          <img src="User.png" style={{ marginRight: "10px" }} />
+          <img
+            src="shuffle.png"
+            style={{ marginRight: "10px", width: "18px" }}
+          />
           {row.workflowName}
         </div>
       );
@@ -29,7 +36,11 @@ const columns = [
   },
   {
     formatter: (rowContent: any, row: any) => {
-      return <div>{row.createdBy?.userName}</div>;
+      return (
+        <div>
+          {row.createdBy?.firstName} {row.createdBy?.lastName}
+        </div>
+      );
     },
     dataField: "createdBy",
     text: "CREATED BY",
@@ -43,37 +54,48 @@ const columns = [
       return moment.utc(d).format("YYYY-MM-DD");
     },
   },
-];
-
-const options = {
-  paginationSize: 1,
-  pageStartIndex: 1,
-  firstPageText: "First",
-  prePageText: "Previous",
-  nextPageText: "Next",
-  lastPageText: "Last",
-  nextPageTitle: "First page",
-  prePageTitle: "Pre page",
-  firstPageTitle: "Next page",
-  lastPageTitle: "Last page",
-  showTotal: true,
-  totalSize: 10,
-  disablePageTitle: true,
-  sizePerPageList: [
-    {
-      text: "9",
-      value: 2,
+  {
+    formatter: (rowContent: any, row: any) => {
+      return (
+        <div className="text-center actions" style={{ marginRight: "10px" }}>
+          <Button
+            type="submit"
+            className="actions"
+            style={{
+              marginLeft: "10px",
+              backgroundColor: "#00E676",
+              border: "#00E676",
+              padding: "9px 13px",
+              lineHeight: "10px",
+              fontSize: "13px",
+              cursor: "pointer",
+            }}
+          >
+            <img
+              src="edit.png"
+              alt="edit"
+              className="actions"
+              style={{
+                width: "12px",
+                height: "12px",
+                marginRight: "7px",
+              }}
+            />
+            Edit
+          </Button>
+        </div>
+      );
     },
-  ],
-};
+    dataField: "",
+    text: "",
+  },
+];
 
 const WorkflowList = () => {
   const dispatch = useDispatch();
   const [modalShow, setModalShow] = React.useState(false);
   const [editWorkflow, setEditWorkflow] = React.useState(false);
   const [pageNo, setPageNo] = useState(1);
-  const [showtag, setShowTag] = useState(false);
-  const [rejecttag, setRejectTag] = useState(false);
   const [selectid, setSelectId] = useState("");
   const [selected, setSelected] = useState([]);
   const [showDelete, setShowDelete] = useState(false);
@@ -83,38 +105,10 @@ const WorkflowList = () => {
   const [formState, setformState] = useState({
     workflowName: "",
     steps: [],
-  });
+    permissionList: [],
+  }); //Set form state
 
-  // const selectRow: SelectRowProps<any> = {
-  //   mode: "checkbox",
-  //   onSelect: (row, isSelect, rowIndex, e) => {
-  //     let rows = JSON.parse(JSON.stringify(selectedRows));
-
-  //     if (isSelect) {
-  //       rows.push(row.id);
-  //     } else {
-  //       const unSelectedRow = rows.findIndex((item: any) => {
-  //         item === row.id;
-  //       });
-  //       rows.splice(unSelectedRow, 1);
-  //     }
-  //     setSelectRows(rows);
-  //   },
-  //   onSelectAll: (isSelect, rows, e) => {
-  //     let array = JSON.parse(JSON.stringify(selectedRows));
-
-  //     if (isSelect) {
-  //       for (let i = 0; i < rows.length; i++) {
-  //         array.push(rows[i].id);
-  //       }
-  //     } else {
-  //       array.splice(0, rows.length);
-  //     }
-  //     setSelectRows(array);
-  //   },
-  // };
-  // console.log(selectedRows);
-
+  //Bootstrap row events when click a row
   const rowEvents = {
     onClick: (e: any, row: any, rowIndex: number) => {
       let obj = JSON.parse(JSON.stringify(row));
@@ -128,6 +122,7 @@ const WorkflowList = () => {
     },
   };
 
+  //Fetch workflow data according to paginated list
   useEffect(() => {
     dispatch(
       getPaginatedList({
@@ -139,42 +134,40 @@ const WorkflowList = () => {
     );
   }, []);
 
+  //Show delete modal
   const handleShowDelete = () => {
     setModalShow(false);
     setShowDelete(true);
   };
 
+  //Hide workflow create/update modal
   const onHide = () => {
     setModalShow(false);
-    setShowTag(false);
-    setRejectTag(false);
   };
 
+  //Cancel workflow create/update modal
   const cancel = () => {
     setModalShow(false);
-    setShowTag(false);
-    setRejectTag(false);
   };
 
+  //workflow inactivate
   const handleSelectDelete = () => {
     if (selectid) {
       dispatch(workflowDelete(selectid, pageNo, showSearch));
       setSelectId("");
     } else {
-      // dispatch(workflowDelete(selectedRows));
       setSelected([]);
     }
     setShowDelete(false);
   };
 
+  //Submit form
   const formSubmit = (e: any) => {
     e.preventDefault();
     if (editWorkflow) {
       dispatch(updateWorkflow(formState));
-      
     } else {
       dispatch(addWorkflow(formState));
-      
     }
 
     setModalShow(false);
@@ -182,19 +175,22 @@ const WorkflowList = () => {
     setformState({
       workflowName: "",
       steps: [],
+      permissionList: [],
     });
   };
 
+  //Add a new workflow
   const editsave = () => {
     setModalShow(true);
     setEditWorkflow(false);
     setformState({
       workflowName: "",
       steps: [],
+      permissionList: [],
     });
   };
 
-  
+  //Get paginated
   const pagination = paginationFactory({
     sizePerPage: 5,
     page: pageNo ? pageNo : 1,
@@ -204,6 +200,7 @@ const WorkflowList = () => {
     totalSize: state.workflowData.allWorkflowDetails.totalSize,
   });
 
+  //Load workflow details when page change
   const onTableChange = (name: any, e: any) => {
     setPageNo(e.page);
     dispatch(
@@ -216,6 +213,7 @@ const WorkflowList = () => {
     );
   };
 
+  //Search values
   const onKeyHandler = (e: any) => {
     if (e.key === "Enter") {
       var searchValue = {
@@ -223,6 +221,7 @@ const WorkflowList = () => {
           {
             property: "workflow_name",
             operator: "LIKE",
+            groupingOperator: "OR",
             value: `${showSearch}`,
           },
         ],
@@ -237,17 +236,7 @@ const WorkflowList = () => {
 
   return (
     <Layout>
-      <div className="container">
-        <div className="d-flex flex-row">
-          <div className="Home" style={{ padding: "10px" }}>
-            <img
-              src="/Home_Button.png"
-              alt="img"
-              style={{ width: "45px", height: "25px" }}
-            />
-          </div>
-        </div>
-        <hr style={{ color: "#636363" }} />
+      <div className="container" style={{ paddingTop: "20px" }}>
         <div className="d-flex flex-column flex-md-row justify-content-between">
           <div>
             <h2 style={{ color: "#4B4B4B", fontWeight: "bold" }}>
@@ -305,6 +294,7 @@ const WorkflowList = () => {
             </div>
           </div>
         </div>
+
         <div className="d-flex flex-column flex-md-row justify-content-between">
           <div
             className="col-md-6"
@@ -355,19 +345,19 @@ const WorkflowList = () => {
             }}
           ></div>
         </div>
+
         <div style={{ marginTop: "25px", color: "#636363" }}>
           <BootstrapTable
-            keyField="companyId"
+            keyField="id"
             data={state.workflowData.allWorkflowDetails.data}
             columns={columns}
             pagination={pagination}
-            rowStyle={{ color: "#636363", cursor: "pointer" }}
-            classes="table table-hover"
             bordered={false}
             rowEvents={rowEvents}
             onTableChange={onTableChange}
             noDataIndication={<></>}
             remote
+            rowStyle={{ color: "#636363" }}
           />
         </div>
         <DeleteModal
@@ -385,10 +375,6 @@ const WorkflowList = () => {
           formState={formState}
           setformState={setformState}
           cancel={cancel}
-          setShowTag={setShowTag}
-          setRejectTag={setRejectTag}
-          showtag={showtag}
-          rejecttag={rejecttag}
           handleShowDelete={handleShowDelete}
         />
       </div>

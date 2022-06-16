@@ -18,13 +18,18 @@ import {
   faGear,
   faUser,
   faBell,
+  faExclamationTriangle
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { userLogout } from "../redux/actions/authActions";
 
 const Layout = ({ children }: { children: JSX.Element }) => {
+
   const dispatch = useDispatch();
+
+  const isDenied = useSelector((state: any) => state.loadingData.denied);
+
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
@@ -37,12 +42,14 @@ const Layout = ({ children }: { children: JSX.Element }) => {
             className="ms-3 me-4"
             alt="logo"
           />
+          <Link to={"/document"} style={{textDecoration:"none"}}>
           <div className="me-4 clickable hover-blue">
-            <FontAwesomeIcon className="me-1" icon={faBook} /> Workplace
+            <FontAwesomeIcon className="me-1" icon={faBook} /> Documents
           </div>
+          </Link>
           <Link to={"/tags"} style={{textDecoration:"none"}}>
           <div className="me-4 clickable hover-blue">
-            <FontAwesomeIcon className="me-1" icon={faTags} /> Libraries
+            <FontAwesomeIcon className="me-1" icon={faTags} /> Tags
           </div>
           </Link>
           <div className="clickable hover-blue">
@@ -97,7 +104,6 @@ const Layout = ({ children }: { children: JSX.Element }) => {
                 }
               >
                 <MenuItem>User Account</MenuItem>
-                <MenuItem>Two-factor Authentication</MenuItem>
               </SubMenu>
               <SubMenu
                 title="General Settings"
@@ -124,17 +130,23 @@ const Layout = ({ children }: { children: JSX.Element }) => {
                   Companies
                   <Link to="/company" />
                 </MenuItem>
-                <MenuItem>Vocabularies</MenuItem>
-                <MenuItem>Configuration</MenuItem>
                 <MenuItem>
                   User Role <Link to="/userrole" />
                 </MenuItem>
+                <MenuItem>Configuration</MenuItem>
               </SubMenu>
             </Menu>
           </ProSidebar>
         </div>
 
-        <div className="ps-4 pe-4 pt-3 " style={{width:"100%"}}>{children}</div>
+        {!isDenied ?
+            <div className="ps-4 pe-4 pt-3 " style={{width: "100%"}}>{children}</div>
+            :
+            <div className="ps-4 pe-4 pt-3 error-page mb-5" style={{width: "100%"}}>
+              <FontAwesomeIcon className="me-1 fa-5x mb-4" color={'red'} icon={faExclamationTriangle}/>
+              <div color={'red'}>You don't have permission to access this page</div>
+            </div>
+        }
       </div>
     </div>
   );

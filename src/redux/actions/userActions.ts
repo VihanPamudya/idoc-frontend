@@ -15,7 +15,7 @@ export const addUser = (data: any) => async (dispatch: any) => {
 
         dispatch(
             getPaginatedList({
-                descending: false,
+                descending: true,
                 limit: 5,
                 orderFields: ["epf_number"],
             })
@@ -133,15 +133,25 @@ export const userInactive = (epfNumber: string, pageNo: number, searchVal: Strin
     }
 };
 
-export const userSearch = () => async (dispatch: any) => {
-  dispatch({ type: userActionTypes.USER_SEARCH_REQUEST });
-  setTimeout(() => {
-    dispatch({
-      type: userActionTypes.USER_SEARCH_SUCCEED,
-      payload: [
-        { id: "1", username: "user 1" },
-        { id: "2", username: "user 2" },
-      ],
-    });
-  }, 2000);
+export const userSearch = (details:any) => async (dispatch: any) => {
+    dispatch({ type: userActionTypes.USER_SEARCH_REQUEST });
+  
+    try {
+      const res: any = await APIService({
+          url: `/user-management/user/list`,
+          auth: true,
+          method: 'POST',
+          data: details,
+      });
+  
+      dispatch({
+          type: userActionTypes.USER_INACTIVE_SUCCEED,
+          payload: res.data
+      });
+  } catch (err: any) {
+      dispatch({
+          type: userActionTypes.USER_SEARCH_FAILED,
+          payload: err ? err.data : null
+      });
+  }
 };

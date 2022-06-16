@@ -1,7 +1,6 @@
-import React from "react";
 import { useState, useEffect } from "react";
 import paginationFactory from "react-bootstrap-table2-paginator";
-import BootstrapTable, { SelectRowProps } from "react-bootstrap-table-next";
+import BootstrapTable from "react-bootstrap-table-next";
 import {  useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 
@@ -10,125 +9,117 @@ import {
   updateUserGroup,
   addUserGroup,
   getPaginatedList,
+  userGroupSearch
 } from "../redux/actions/userGroupActions";
 
 import UserGroupModal from "../components/user-group/user-group-modal";
 import DeleteModal from "../components/common/DeleteModal";
-import { getUsersList } from "../redux/actions/userActions";
 import Layout from "../Layout";
-
-const columns = [
-  {
-    formatter: (rowContent: any, row: any) => {
-      return (
-        <div>
-          <img src="Vector.png" style={{ marginRight: "10px" }} />
-          {row.name}
-        </div>
-      );
-    },
-    dataField: "name",
-    text: "NAME",
-  },
-  {
-     formatter: (rowContent: any, row: any) => {
-        return <div>{row.member_count}</div>;
-    },
-    dataField: "member_count",
-    text: "MEMBERS",
-  },
-  {
-    dataField: "createdDateTime",
-    text: "CREATED DATE",
-    formatter: (rowContent: any, row: any) => {
-      var d = new Date(0);
-      d.setUTCSeconds(rowContent);
-      return moment.utc(d).format("YYYY-MM-DD");
-    },
-  },
-];
-
-const options = {
-  paginationSize: 1,
-  pageStartIndex: 1,
-  firstPageText: "First",
-  prePageText: "Previous",
-  nextPageText: "Next",
-  lastPageText: "Last",
-  nextPageTitle: "First page",
-  prePageTitle: "Pre page",
-  firstPageTitle: "Next page",
-  lastPageTitle: "Last page",
-  showTotal: true,
-  totalSize: 10,
-  disablePageTitle: true,
-  sizePerPageList: [
-    {
-      text: "9",
-      value: 2,
-    },
-  ],
-};
+import { Button } from "react-bootstrap";
 
 const GroupList = () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
     const [modalShow, setModalShow] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
     const [editGroup, setEditgroup] = useState(true);
-    const [selected, setSelected] = useState([]);
     const [selectedId, setSelectedId] = useState("");
     const [pageNo, setPageNo] = useState(1);
   const [form, setForm] = useState({
     name: "",
     parentGroup_id: 0,
-    parentGroup_name: "",
+    parent_group_name: "",
   });
   const [search, setSearch] = useState("");
   const state = useSelector((state: any) => state);
 
-  const tableRowEvents = {
-    onClick: (e: any, row: any, rowIndex: number) => {
-      let parentgroup = state.userGroupData.allUserGroupDetails.data.find(
-        (group: any) => group.id == row.parentGroup_id
-      );
-      if (parentgroup != null) {
-        let newForm = { ...row, parentGroup_name: parentgroup.name };
-        setForm(newForm);
-      } else {
-        setForm(row);
+  const columns = [
+    {
+      formatter: (rowContent: any, row: any) => {
+        return (
+          <div>
+            <img src="users.png" style={{ marginRight: "10px", width:"24px" }} />
+            {row.name}
+          </div>
+        );
+      },
+      dataField: "name",
+      text: "NAME",
+    },
+    {
+       formatter: (rowContent: any, row: any) => {
+          return <div>{row.member_count}</div>;
+      },
+      dataField: "member_count",
+      text: "MEMBERS",
+    },
+    {
+      dataField: "createdDateTime",
+      text: "CREATED DATE",
+      formatter: (rowContent: any, row: any) => {
+        var d = new Date(0);
+        d.setUTCSeconds(rowContent);
+        return moment.utc(d).format("YYYY-MM-DD");
+      },
+    },
+    {
+        formatter: (rowContent: any, row: any) => {
+          return (
+            <div className="text-center actions" style={{ marginRight: "10px" }}>
+              <Button
+                type="submit"
+                className="actions"
+                style={{
+                  marginLeft: "10px",
+                  backgroundColor: "#00E676",
+                  border: "#00E676",
+                  padding: "9px 13px",
+                  lineHeight: '10px',
+                  fontSize: 13,
+                }}
+              >
+                <img
+                  src="edit.png"
+                  alt="edit"
+                  className="actions"
+                  style={{
+                    width: "12px",
+                    height: "12px",
+                    marginRight: "7px",
+                    marginTop: "-3px"
+                  }}
+                />
+                Edit
+              </Button>
+            </div>
+          );
+        },
+        dataField: "Actions",
+        text: "",
       }
+  ];
+
+  useEffect(() => {
+    dispatch(
+      getPaginatedList({
+        descending: true,
+        limit: 5,
+        orderFields: ["group_id"],
+        page: pageNo,
+      })
+    );
+  }, []);
+
+  const tableRowEvents = {
+    onClick: (e: any, row: any, rowIndex: number) => {  
+      setForm(row);
       setSelectedId(row.id);
       setModalShow(true);
       setEditgroup(true);
     },
   };
 
-//   const selectRow: SelectRowProps<any> = {
-//     mode: "checkbox",
-//     onSelect: (row, isSelected, rowIndex) => {
-//       let newSelected = JSON.parse(JSON.stringify(selected));
-//       if (isSelected) {
-//         newSelected.push(row.id);
-//       } else {
-//         var index = newSelected.indexOf(row.id);
-//         newSelected.splice(index, 1);
-//       }
-//       setSelected(newSelected);
-//     },
-//     onSelectAll: (isSelect, rows, e) => {
-//       let array = JSON.parse(JSON.stringify(selected));
 
-//       if (isSelect) {
-//         for (let i = 0; i < rows.length; i++) {
-//           array.push(rows[i].id);
-//         }
-//       } else {
-//         array.splice(0, rows.length);
-//       }
-//       setSelected(array);
-//     },
-//   };
 
   const formSubmit = (e: any) => {
     e.preventDefault();
@@ -146,7 +137,7 @@ const GroupList = () => {
     setForm({
       name: "",
       parentGroup_id: 0,
-      parentGroup_name: "",
+      parent_group_name: "",
     });
   };
 
@@ -157,28 +148,10 @@ const GroupList = () => {
     setShowDelete(true);
   };
 
-  useEffect(() => {
-    dispatch(
-      getPaginatedList({
-        descending: true,
-        limit: 5,
-        orderFields: ["group_id"],
-        page: pageNo,
-      })
-    );
-  }, []);
-
-  const onGroupDelete = () => {
-    setShowDelete(true);
-  };
-
   const handleSelectDelete = () => {
     if (selectedId) {
       dispatch(userGroupDelete(selectedId, pageNo, search));
       setSelectedId("");
-    } else {
-      // dispatch(userGroupDelete(selected));
-      setSelected([]);
     }
     setShowDelete(false);
   };
@@ -201,9 +174,6 @@ const GroupList = () => {
       dispatch(getPaginatedList(searchValue));
     }
   };
-  const cancel = () => {
-    setModalShow(false);
-  };
 
   const pagination = paginationFactory({
     sizePerPage: 5,
@@ -218,11 +188,6 @@ const GroupList = () => {
     setPageNo(e.page);
     dispatch(
       getPaginatedList({
-        // filterData: [{
-        //     property: "status",
-        //     operator: "EQUAL",
-        //     value: "active"
-        // }],
         descending: true,
         limit: 5,
         orderFields: ["group_id"],
@@ -230,20 +195,28 @@ const GroupList = () => {
       })
     );
   };
+
+  //search funtion to get parent group options in the form
+  const onSearch =(value:string) => {
+    
+    var searchValue = {
+      filterData: [
+        {
+          property: "group_name",
+          operator: "LIKE",
+          value: `${value}`,
+        },
+      ],
+      limit: 10,
+      page: 1,
+    };
+    dispatch(userGroupSearch(searchValue));
+  }
+
   return (
     <Layout>
-      <div>
+      <div style={{ paddingTop: "20px" }}>
         <div className="container">
-          <div className="d-flex flex-row">
-            <div className="Home" style={{ padding: "10px" }}>
-              <img
-                src="/Home_Button.png"
-                alt="img"
-                style={{ width: "45px", height: "25px" }}
-              />
-            </div>
-          </div>
-          <hr style={{ color: "#636363" }} />
           <div className="d-flex flex-column flex-md-row justify-content-between">
             <div>
               <h2 style={{ color: "#4B4B4B", fontWeight: "bold" }}>
@@ -251,29 +224,7 @@ const GroupList = () => {
               </h2>
             </div>
             <div className="d-flex">
-              <div className="me-2">
-                {selected.length != 0 ? (
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    style={{ backgroundColor: "#FF0000", border: "#00B0FF" }}
-                    onClick={onGroupDelete}
-                  >
-                    <img
-                      src="delete.png"
-                      alt="delete"
-                      style={{
-                        width: "15px",
-                        height: "15px",
-                        marginRight: "7px",
-                      }}
-                    />
-                    Delete
-                  </button>
-                ) : (
-                  ""
-                )}
-              </div>
+             
               <div>
                 <button
                   type="button"
@@ -283,7 +234,7 @@ const GroupList = () => {
                     setForm({
                       name: "",
                       parentGroup_id: 0,
-                      parentGroup_name: "",
+                      parent_group_name: "",
                     });
                     setModalShow(true);
                     setEditgroup(false);
@@ -363,14 +314,14 @@ const GroupList = () => {
         </div>
         <UserGroupModal
           show={modalShow}
-          onHide={() => setModalShow(false)}
           editGroup={editGroup}
           form={form}
           setForm={setForm}
           formSubmit={formSubmit}
           handleShowDelete={handleShowDelete}
-          groups={state.userGroupData.allUserGroupDetails.data}
-          cancel={cancel}
+          groups={state.userGroupData.searchGroupDetails}
+          cancel={() => setModalShow(false)}
+          onSearch={onSearch}
         />
         <DeleteModal
           isOpen={showDelete}

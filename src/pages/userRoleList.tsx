@@ -222,6 +222,10 @@ const UserRoleList = () => {
     setShowDelete(false);
   };
 
+  const cancel = () => {
+    setModalShow(false);
+  };
+
   const formSubmit = (e: any) => {
     e.preventDefault();
     let updatedPackages = formState.packages.map((el:any)=>{
@@ -357,17 +361,7 @@ const UserRoleList = () => {
 
   return (
     <Layout>
-      <div className="container">
-        <div className="d-flex flex-row">
-          <div className="Home" style={{ padding: "10px" }}>
-            <img
-              src="/Home_Button.png"
-              alt="img"
-              style={{ width: "45px", height: "25px" }}
-            />
-          </div>
-        </div>
-        <hr style={{ color: "#636363" }} />
+      <div className="container" style={{ paddingTop: "20px" }}>
         <div className="d-flex flex-column flex-md-row justify-content-between">
           <div>
             <h2 style={{ color: "#4B4B4B", fontWeight: "bold" }}>
@@ -506,6 +500,7 @@ const UserRoleList = () => {
           formSubmit={formSubmit}
           formState={formState}
           setformState={setformState}
+          cancel={cancel}
         />
       </div>
     </Layout>

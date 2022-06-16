@@ -4,6 +4,7 @@ import produce from "immer";
 const initialState = {
   userGroupDetails: null,
   allUserGroupDetails: { data: [], totalSize: 0 },
+  searchGroupDetails: []
 };
 
 const userGroupData = produce(
@@ -25,7 +26,7 @@ const userGroupData = produce(
       }
 
       case userGroupActionTypes.USER_GROUP_SEARCH_SUCCEED: {
-        state.allUserGroupDetails = payload;
+        state.searchGroupDetails = payload.data;
         return state;
       }
 

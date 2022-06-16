@@ -14,9 +14,13 @@ export const addCompany = (companydata: any) => async (dispatch: any) => {
             data: companydata
         });
 
-        dispatch(getPaginatedList(
-            {limit: 5})
-        )
+        dispatch(
+            getPaginatedList({
+                descending: true,
+                limit: 5,
+                orderFields: ["company_id"],
+            })
+        );
         return true;
 
     } catch (err: any) {
@@ -154,15 +158,25 @@ export const getActiveUsers = (companyId: string[]) => async (dispatch: any) =>{
 }
 
 
-export const companySearch = () => async (dispatch: any) => {
-    dispatch({type: companyActionTypes.COMPANY_SEARCH_REQUEST});
-    setTimeout(() => {
-        dispatch({
-            type: companyActionTypes.COMPANY_SEARCH_SUCCEED,
-            payload: [
-                {id: "1", username: "user 1"},
-                {id: "2", username: "user 2"},
-            ],
-        });
-    }, 2000);
+export const companySearch = (details:any) => async (dispatch: any) => {
+    dispatch({ type: companyActionTypes.COMPANY_SEARCH_REQUEST });
+  
+    try {
+      const res: any = await APIService({
+          url: `/system-configuration/company-management/company-registration/list`,
+          auth: true,
+          method: 'POST',
+          data: details,
+      });
+  
+      dispatch({
+          type: companyActionTypes.COMPANY_SEARCH_SUCCEED,
+          payload: res.data
+      });
+  } catch (err: any) {
+      dispatch({
+          type: companyActionTypes.COMPANY_SEARCH_FAILED,
+          payload: err ? err.data : null
+      });
+  }
 };
